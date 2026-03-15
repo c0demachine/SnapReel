@@ -1,0 +1,138 @@
+{% extends “base.html” %}
+{% block title %}Upload – SnapReel{% endblock %}
+{% block head %}
+
+<style>
+  .upload-wrap {
+    max-width: 560px; margin: 0 auto; padding: 40px 20px;
+  }
+  .upload-wrap h1 { font-size: 1.6rem; margin-bottom: 24px; }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent2);
+    background: rgba(123,92,240,0.05);
+  }
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+  .drop-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .drop-label { font-size: 1rem; font-weight: 500; margin-bottom: 6px; }
+  .drop-hint { font-size: 0.82rem; color: var(--muted); }
+  .file-chosen {
+    background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 8px; padding: 10px 14px; font-size: 0.85rem;
+    color: var(--accent3); margin-bottom: 18px; display: none;
+  }
+
+  .toggle-wrap {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px;
+  }
+  .toggle-wrap label { color: var(--text); margin-bottom: 0; font-size: 0.9rem; cursor: pointer; }
+  input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+  .toggle-note { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  .progress-wrap {
+    display: none; margin-top: 16px;
+    background: var(--surface2); border-radius: 8px; overflow: hidden; height: 8px;
+  }
+  .upload-progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+</style>
+
+{% endblock %}
+{% block content %}
+
+<div class="upload-wrap">
+  <h1>📤 Upload a Video</h1>
+
+{% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+
+  <form method="POST" enctype="multipart/form-data" id="uploadForm">
+    <div class="form-group">
+      <label>Video File</label>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" name="video" id="videoInput" accept="video/*" required>
+        <div class="drop-icon">🎬</div>
+        <div class="drop-label">Drop your video here or click to browse</div>
+        <div class="drop-hint">MP4, MOV, WEBM, AVI, MKV • Max 500MB</div>
+      </div>
+      <div class="file-chosen" id="fileChosen"></div>
+    </div>
+
+```
+<div class="form-group">
+  <label>Title</label>
+  <input type="text" name="title" placeholder="Give your video a title..." required maxlength="120">
+</div>
+
+<div class="form-group">
+  <div class="toggle-wrap">
+    <input type="checkbox" name="publish" id="publishToggle" checked>
+    <div>
+      <label for="publishToggle">Publish to the feed</label>
+      <div class="toggle-note">Uncheck to save as a draft (only you can see it)</div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="upload-progress" id="uploadProgress"></div>
+</div>
+
+<button type="submit" class="btn btn-primary" id="submitBtn" style="margin-top:18px;">
+  Upload Video
+</button>
+<a href="{{ url_for('profile') }}" class="btn btn-ghost" style="margin-left:10px;">Cancel</a>
+```
+
+  </form>
+</div>
+
+<script>
+  const input = document.getElementById('videoInput');
+  const chosen = document.getElementById('fileChosen');
+  const dropZone = document.getElementById('dropZone');
+
+  input.addEventListener('change', () => {
+    if (input.files[0]) {
+      const size = (input.files[0].size / (1024*1024)).toFixed(1);
+      chosen.style.display = 'block';
+      chosen.textContent = '✅ ' + input.files[0].name + ' (' + size + ' MB)';
+    }
+  });
+
+  ['dragover','dragenter'].forEach(e => dropZone.addEventListener(e, ev => {
+    ev.preventDefault(); dropZone.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, () => {
+    dropZone.classList.remove('dragover');
+  }));
+
+  document.getElementById('uploadForm').addEventListener('submit', () => {
+    document.getElementById('progressWrap').style.display = 'block';
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Uploading...';
+    // Fake progress for UX
+    let p = 0;
+    const bar = document.getElementById('uploadProgress');
+    const iv = setInterval(() => {
+      p = Math.min(p + Math.random() * 8, 90);
+      bar.style.width = p + '%';
+      if (p >= 90) clearInterval(iv);
+    }, 300);
+  });
+</script>
+
+{% endblock %}
