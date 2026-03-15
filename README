@@ -1,0 +1,91 @@
+# SnapReel 🎬
+
+A private video sharing platform with invite-code authentication, shorts-style feed, and personal file areas.
+
+## Features
+
+- 🔐 Invite code registration (one-time use codes)
+- 📤 Video upload (MP4, MOV, WEBM, AVI, MKV — up to 500MB)
+- 🎞️ Shorts-style vertical video feed with auto-pause on scroll
+- 👤 Personal profile with draft/publish toggle and delete
+- 👁️ View counts
+
+-----
+
+## Setup
+
+### 1. Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the app
+
+```bash
+python app.py
+```
+
+The app will start at: **http://localhost:5000**
+
+The database (`snapreel.db`) and `uploads/` folder are created automatically on first run.
+
+-----
+
+## Default Invite Codes
+
+These codes are seeded automatically on first launch. Each can only be used once:
+
+|Code   |Code   |Code   |
+|-------|-------|-------|
+|SNAP001|REEL001|KIDS001|
+|SNAP002|REEL002|KIDS002|
+|SNAP003|REEL003|       |
+|SNAP004|       |       |
+|SNAP005|       |       |
+
+-----
+
+## Adding More Invite Codes
+
+Open `snapreel.db` with any SQLite viewer, or run:
+
+```bash
+python -c "
+import sqlite3
+db = sqlite3.connect('snapreel.db')
+codes = ['CODE001', 'CODE002', 'CODE003']  # change these
+for c in codes:
+    db.execute('INSERT INTO invite_codes (code) VALUES (?)', (c,))
+db.commit()
+print('Codes added!')
+"
+```
+
+-----
+
+## File Structure
+
+```
+snapreel/
+├── app.py              # Main Flask app (all routes and logic)
+├── requirements.txt    # Python packages needed
+├── snapreel.db         # SQLite database (auto-created)
+├── uploads/            # Where video files are stored
+└── templates/
+    ├── base.html       # Shared layout and styles
+    ├── login.html      # Login page
+    ├── register.html   # Register with invite code
+    ├── feed.html       # Shorts-style video feed
+    ├── upload.html     # Upload a video
+    └── profile.html    # Personal file / profile area
+```
+
+-----
+
+## Production Notes (for your dad)
+
+- Change `app.secret_key` in `app.py` to a long random string
+- Set `debug=False` in the last line of `app.py`
+- Consider using nginx to serve uploaded files directly for better performance
+- For HTTPS, use Let’s Encrypt / certbot
